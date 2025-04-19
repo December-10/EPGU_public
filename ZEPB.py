@@ -3,7 +3,6 @@ import pyperclip
 import logging
 import pyautogui
 import time
-import PySimpleGUI as sg
 import keyboard
 import re
 from datetime import datetime, timedelta
@@ -16,8 +15,12 @@ from openpyxl import load_workbook
 from PyPDF2 import PdfReader        
 import sys    
 from types import NoneType
-
-sg.theme('DarkGrey5')
+from PyQt5.QtWidgets import (
+    QApplication, QWidget, QLineEdit, QComboBox,
+    QPushButton, QCheckBox, QFileDialog, QHBoxLayout,
+    QVBoxLayout, QMessageBox)
+from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtCore import Qt
 
 if __name__ == '__main__':
 
@@ -127,52 +130,113 @@ if __name__ == '__main__':
                         format="%(asctime)s (%(levelname)s) %(message)s", datefmt='%d.%m.%Y %H:%M:%S')
 
     # настраиваем окно ввода данных
-    text_0 = sg.Text('Введите номер заявления:')
-    text_1 = sg.Text('Выберите город')
-    text_2 = sg.Text('Выберите организацию:')
-    text_3 = sg.Text('Выберите год:')
+    class MyForm(QWidget):
+        def __init__(self):
+            super().__init__()
+            self.setWindowTitle("Ввод данных")  # заголовок
+            self.init_ui()  # функция формирования окна
 
-    zepb_number_input = sg.Input(key='-zepb_number-', size=(26))
-    year_input = sg.Input(key='-year-', size=(26), default_text=2024)
+            # заполняемые формы
+            self.selected_files = ""
+            self.zepb_number = ""
+            self.selected_city = ""
+            self.selected_org = ""
+            self.selected_year = ""
+            self.only_check = False
 
-    cities_list = ["Красноярск", "Новосибирск", "Томск"]
-    cities_list_sg = sg.Combo(cities_list, key='-city-', enable_events=True, readonly=False, default_value="Красноярск", size=(25))
+        def init_ui(self):
+            layout = QVBoxLayout()
 
-    organization_list = ["Экспертная организация 1", "Экспертная организация 2"]
-    organization_list_sg = sg.Combo(organization_list, key='-org-', enable_events=True, readonly=False, default_value="Экспертная организация 1")
+            zepb_number_input_layout = QHBoxLayout()
+            self.zepb_number_text = QLineEdit()
+            self.zepb_number_text.setPlaceholderText("Введите номер(-а) заключения(-й)")
+            zepb_number_input_layout.addWidget(self.zepb_number_text)
+            self.file_button = QPushButton("Выбрать заявление")
+            self.file_button.clicked.connect(self.choose_file)
+            zepb_number_input_layout.addWidget(self.file_button)
+            layout.addLayout(zepb_number_input_layout)
 
-    layout = [[sg.Column([[text_0], [text_1], [text_2], [text_3]]),
-               sg.Column([[zepb_number_input], [cities_list_sg], [organization_list_sg], [year_input]]),
-               sg.Column([[sg.Text('или')], []]),
-               sg.Column([[sg.FilesBrowse('Выберите файл заявления', size=(24, 5))], []])],
-              [sg.Checkbox('Проверить заявления, не регистрируя заключения', key='-only_check-')],
-              [sg.Ok(), sg.Exit()]]
+            self.year_combo = QComboBox()
+            self.year_combo.addItems(['2024', '2025'])
+            layout.addWidget(self.year_combo)
 
-    window = sg.Window('Ввод данных', layout, resizable=True)
+            self.city_combo = QComboBox()
+            self.city_combo.addItems(["Красноярск", "Томск", "Новосибирск"])
+            layout.addWidget(self.city_combo)
+
+            self.org_combo = QComboBox()
+            self.org_combo.addItems(["Экспертная организация 1", "Экспертная организация 2"])
+            layout.addWidget(self.org_combo)
+
+            self.checkbox = QCheckBox("Только проверка заявления")
+            layout.addWidget(self.checkbox)
+
+            button_layout = QHBoxLayout()
+            self.ok_button = QPushButton("Ок")
+            self.ok_button.clicked.connect(self.on_ok_clicked)
+            self.cancel_button = QPushButton("Отмена")
+            self.cancel_button.clicked.connect(self.close)
+            button_layout.addWidget(self.ok_button)
+            button_layout.addWidget(self.cancel_button)
+            layout.addLayout(button_layout)
+
+            self.setLayout(layout)
+
+        def choose_file(self):
+            files, _ = QFileDialog.getOpenFileNames(
+                self,
+                "Выберите заявления",
+                "",
+                "Все файлы (*.*)"
+            )
+            if files:
+                self.selected_files = files  # сохраняем список файлов
+                self.file_button.setText(f"Файлов выбрано: {len(files)}")  # обновляем текст на кнопке
+                self.zepb_number_text.setText(";".join(files))  # ставим список выбранных файлов в полее ввода
+
+        def on_ok_clicked(self):
+            self.close()  # Закрываем форму
+
+    def message(text):
+        msg = QMessageBox(form)
+        msg.setWindowTitle("Информация")
+        msg.setText(text)
+        msg.exec_()
 
     # читаем окно
-    while True:
-        event, values = window.Read()
-        print(values, event)
-        if event == 'Ok':
-            break
-        elif event == sg.WIN_CLOSED or event == "Exit":
-            exit()
-    window.close()
+    app = QApplication(sys.argv)
+    form = MyForm()
+    form.resize(350, 300)
+    # ставим темную тему
+    dark_palette = QPalette()
+    dark_palette.setColor(QPalette.Window, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.WindowText, Qt.white)
+    dark_palette.setColor(QPalette.Base, QColor(25, 25, 25))
+    dark_palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ToolTipBase, Qt.white)
+    dark_palette.setColor(QPalette.ToolTipText, Qt.white)
+    dark_palette.setColor(QPalette.Text, Qt.white)
+    dark_palette.setColor(QPalette.Button, QColor(53, 53, 53))
+    dark_palette.setColor(QPalette.ButtonText, Qt.white)
+    dark_palette.setColor(QPalette.BrightText, Qt.red)
+    dark_palette.setColor(QPalette.Link, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.Highlight, QColor(42, 130, 218))
+    dark_palette.setColor(QPalette.HighlightedText, Qt.black)
+    app.setPalette(dark_palette)
+    app.setStyle("Fusion")
 
-    # если ввод был вручную, то input принимаем с поля ввода данных и разделитель берем пробел
-    if values['Выберите файл заявления'] == '':
-        input = values['-zepb_number-']
-        separator = ' '
-    # в ином случае принимаем input как выбор файлов(список файлов), а разделитель - точка с запятой
-    else:
-        input = values['Выберите файл заявления']
-        separator = ';'
+    form.show()
+    app.exec_()  # Запуск GUI и ожидание закрытия
 
-    rtn_region = values['-city-']
-    exp_organization = values['-org-']
-    year = str(values['-year-'])
-    only_check = values['-only_check-']
+    # выводим данные в переменные
+    input = form.zepb_number_text.text()
+    rtn_region = form.city_combo.currentText()
+    exp_organization = form.org_combo.currentText()
+    year = form.year_combo.currentText()
+    only_check = form.checkbox.isChecked()
+
+    # если вводом являлся список файлов, то разделитель принимаем ";", в ином случае - " "(пробел)
+    separator = ';' if form.selected_files else ' '
 
     processed_files_list = []    # список для внесения успешно обработанных заключений
     error_files_list = []    # список для внесения не обработанных заключений
@@ -189,7 +253,7 @@ if __name__ == '__main__':
 
     # определяем, не открыт ли файл сводной и если открыт, то программу не запускаем:
     if check_file_open(consolidated_file_directory) is True and only_check is not True:
-        print(sg.popup(f'Файл {consolidated_file_directory} открыт.\nЗакройте его и запустите программу повторно.'))
+        message(f'Файл {consolidated_file_directory} открыт.\nЗакройте его и запустите программу повторно.')
         exit()
 
     # вносим данные с файла сводной в словарь
@@ -198,8 +262,8 @@ if __name__ == '__main__':
             wb_cf = load_workbook(consolidated_file_directory, data_only=False)
             break
         except:
-            print(sg.popup(f'Не удалось открыть файл {consolidated_file_directory}.'
-                           'Проверьте его, после чего нажмите Ок'))
+            message(f'Не удалось открыть файл {consolidated_file_directory}.'
+                           'Проверьте его, после чего нажмите Ок')
             continue
 
     try:
@@ -921,8 +985,8 @@ if __name__ == '__main__':
                                 os.rename(fr"{downloads_directory}/pdf.pdf", fr"{downloads_directory}/{file_name}.pdf")
                                 break
                             except:
-                                print(sg.popup(f'Не удалось переименовать файл уведомления: {downloads_directory}/pdf.pdf".\n'
-                                               'Проверьте, не открыт ли он и при необходимости закройте, после чего нажмите "Ок"'))
+                                message(f'Не удалось переименовать файл уведомления: {downloads_directory}/pdf.pdf".\n'
+                                               'Проверьте, не открыт ли он и при необходимости закройте, после чего нажмите "Ок"')
                                 continue
                         break
                     elif os.path.isfile(fr"{downloads_directory}/pdf.pdf") is False:
@@ -937,8 +1001,8 @@ if __name__ == '__main__':
                     OpenIt.terminate()
                 except FileNotFoundError:
                     # в случае ошибки открываем файл заявления с помощью библиотеки os
-                    print(sg.popup('Возникла ошибка открытия файла pdf с помощью subprocess. Открываем файл с помощью os.'
-                                   'Для продолжения нажмите Ok.'))
+                    message('Возникла ошибка открытия файла pdf с помощью subprocess. Открываем файл с помощью os.'
+                                   'Для продолжения нажмите Ok.')
                     os.startfile(fr"{downloads_directory}/{file_name}.pdf")
                     working_with_pdf()
                     keyboard.press_and_release("alt+F4")
@@ -969,8 +1033,8 @@ if __name__ == '__main__':
                     except:
                         n += 1
                         if n >= 5:
-                            print(sg.popup('Бот не может переместить файл из папки Downloads в папку Archivation.\n'
-                                           'Переместите самостоятельно и нажмите Ок'))
+                            message('Бот не может переместить файл из папки Downloads в папку Archivation.\n'
+                                           'Переместите самостоятельно и нажмите Ок')
                             break
                         time.sleep(1)
                         continue
@@ -1022,8 +1086,8 @@ if __name__ == '__main__':
                         wb_cf.save(consolidated_file_directory)
                         break
                     except PermissionError:
-                        print(sg.popup(f'Не удалось сохранить файл {consolidated_file_directory}.'
-                                       'Проверьте, не открыт ли он и при необходимости закройте, после чего нажмите Ок'))
+                        message(f'Не удалось сохранить файл {consolidated_file_directory}.'
+                                       'Проверьте, не открыт ли он и при необходимости закройте, после чего нажмите Ок')
                         continue
 
                 # Удаляем архивный файл с заявлением из папки загрузок
@@ -1058,25 +1122,25 @@ if __name__ == '__main__':
 
     if only_check is not True:
         if len(error_files_list) == 0:
-            print(sg.popup(f'Готово. Обработаны заключения ({len(processed_files_list)}):\n{processed_files}.'))
+            message(f'Готово. Обработаны заключения ({len(processed_files_list)}):\n{processed_files}.')
         elif len(error_files_list) > 0 and len(processed_files_list) > 0:
-            print(sg.popup(f'Готово. Обработаны заключения ({len(processed_files_list)}):\n{processed_files}.'
+            message(f'Готово. Обработаны заключения ({len(processed_files_list)}):\n{processed_files}.'
                            f'\nВозникли ошибки у заключений ({len(error_files_list)}):\n{error_files}.'
-                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}'))
+                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}')
             os.startfile('ZEPB.log')
         elif len(error_files_list) > 0 and len(processed_files_list) == 0:
-            print(sg.popup(f'Заключения не были обработаны - возникли ошибки у заключений ({len(error_files_list)}):\n{error_files}.'
-                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}'))
+            message(f'Заключения не были обработаны - возникли ошибки у заключений ({len(error_files_list)}):\n{error_files}.'
+                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}')
             os.startfile('ZEPB.log')
     else:
         if len(error_files_list) == 0:
-            print(sg.popup(f'Ни одно из указанных заявлений не содержит ошибок ({len(processed_files_list)}):\n{processed_files}.'))
+            message(f'Ни одно из указанных заявлений не содержит ошибок ({len(processed_files_list)}):\n{processed_files}.')
         elif len(error_files_list) > 0 and len(processed_files_list) > 0:
-            print(sg.popup(f'Не содержат ошибок ({len(processed_files_list)}):\n{processed_files}.'
+            message(f'Не содержат ошибок ({len(processed_files_list)}):\n{processed_files}.'
                            f'\nЕсть ошибки в ({len(error_files_list)}):\n{error_files}.'
-                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}'))
+                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}')
             os.startfile('ZEPB.log')
         elif len(error_files_list) > 0 and len(processed_files_list) == 0:
-            print(sg.popup(f'Во всех заявлениях есть ошибки ({len(error_files_list)}):\n{error_files}.'
-                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}'))
+            message(f'Во всех заявлениях есть ошибки ({len(error_files_list)}):\n{error_files}.'
+                           f'\nПодробности в файле {Path(os.getcwd(), 'ZEPB.log')}')
             os.startfile('ZEPB.log')

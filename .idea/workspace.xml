@@ -7,8 +7,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="1cdcae4e-3392-495f-9feb-c527e4cb0875" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="1cdcae4e-3392-495f-9feb-c527e4cb0875" name="Changes" comment="First commit">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZEPB.log" beforeDir="false" afterPath="$PROJECT_DIR$/ZEPB.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ZEPB.py" beforeDir="false" afterPath="$PROJECT_DIR$/ZEPB.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -42,7 +44,7 @@
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "Python.URL.executor": "Run",
     "Python.ZEPB (1).executor": "Run",
-    "Python.ZEPB.executor": "Run",
+    "Python.ZEPB.executor": "Debug",
     "Python.ZEPB_counter.executor": "Run",
     "Python.ZEPB_counter_docx.executor": "Run",
     "Python.ZEPB_formatter.executor": "Run",
@@ -56,7 +58,7 @@
     "Python.test.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "C:/Users/danil/PycharmProjects/EPGU_public",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable"
   }
@@ -82,14 +84,27 @@
       <option name="presentableId" value="Default" />
       <updated>1717847801170</updated>
     </task>
+    <task id="LOCAL-00001" summary="First commit">
+      <option name="closed" value="true" />
+      <created>1745063827176</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1745063827176</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="First commit" />
+    <option name="LAST_COMMIT_MESSAGE" value="First commit" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ZEPB.py</url>
-          <line>602</line>
+          <line>666</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>

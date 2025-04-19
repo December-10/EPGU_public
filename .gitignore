@@ -1,0 +1,10 @@
+/.venv
+/auto-py-to-exe
+/test.py
+/ZEPB_counter_docx.py
+/ZEPB_counter.py
+/formatter.py
+/attestation.py
+/URL.py
+/notifications.py
+/notes.py

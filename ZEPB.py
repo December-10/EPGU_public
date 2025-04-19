@@ -19,7 +19,7 @@ from PyQt5.QtWidgets import (
     QApplication, QWidget, QLineEdit, QComboBox,
     QPushButton, QCheckBox, QFileDialog, QHBoxLayout,
     QVBoxLayout, QMessageBox)
-from PyQt5.QtGui import QPalette, QColor
+from PyQt5.QtGui import QPalette, QColor, QCloseEvent
 from PyQt5.QtCore import Qt
 
 if __name__ == '__main__':
@@ -196,6 +196,9 @@ if __name__ == '__main__':
 
         def on_ok_clicked(self):
             self.close()  # Закрываем форму
+
+        def closeEvent(self, event: QCloseEvent):
+            exit()
 
     def message(text):
         msg = QMessageBox(form)
